@@ -1,0 +1,69 @@
+#include <gtk/gtk.h>
+#include <cairo.h>
+#include <math.h>
+
+void destroy(GtkWidget *widget, gpointer data)
+{
+    gtk_main_quit();
+}
+
+
+static void do_drawing(cairo_t *cr)
+{
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL,
+      CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size(cr, 40.0);
+
+  cairo_move_to(cr, 10.0, 50.0);
+  cairo_show_text(cr, "Disziplin ist Macht.");    
+}
+
+static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, 
+    gpointer user_data)
+{      
+  do_drawing(cr);
+
+  return FALSE;
+}
+
+int main(int argc, char *argv[])
+{
+    GtkWidget *window;
+    GtkWidget *darea;
+    gtk_init(&argc, &argv);
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Pasziánsz");
+    gtk_window_maximize(GTK_WINDOW(window));
+    darea = gtk_drawing_area_new();
+    gtk_container_add(GTK_CONTAINER(window), darea);
+
+    g_signal_connect(G_OBJECT(darea), "draw", 
+      G_CALLBACK(on_draw_event), NULL); 
+    g_signal_connect(window, "destroy",
+      G_CALLBACK(gtk_main_quit), NULL);
+
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    /* Connect the main window to the destroy */
+    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy), NULL);
+    gtk_widget_show_all(window);
+
+    //draw(area, x, y);
+
+/*    
+table = gtk_table_new (10, 10, TRUE);
+      gtk_table_set_col_spacings(GTK_TABLE(table),10);
+      gtk_table_set_row_spacings(GTK_TABLE(table),5);
+      gtk_container_add (GTK_CONTAINER (window), table);
+
+      area = gtk_drawing_area_new();
+      gtk_signal_connect (GTK_OBJECT(area), "event", G_CALLBACK (load_interface),     (gpointer)area);
+      gtk_table_attach_defaults (GTK_TABLE(table), area, 1, 10, 0, 10);
+*/
+    
+    
+    gtk_main();
+
+    return 0;
+}

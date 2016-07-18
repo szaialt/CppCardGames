@@ -1,0 +1,265 @@
+#include "spider.h"
+#include <algorithm>
+#include <stdexcept>      // std::invalid_argument
+
+using namespace std;
+
+Spider::Spider(int n){
+  int suit_num = 1;
+  if (n == 2)
+    suit_num = n;
+  else if (n == 4)
+    suit_num = n;
+  this->strat = game_strategy::constant;
+  std::vector<Card> cards = std::vector<Card>();
+
+  //A pakli előállítása
+  std::vector<suit> suits = std::vector<suit>();
+  if (suit_num == 4) { 
+      
+  suits.push_back(suit::spades);
+  suits.push_back(suit::hearts);
+  suits.push_back(suit::clubs);
+  suits.push_back(suit::diamonds);  
+   
+    Card card = Card(suits.at(0), 1);
+    for (int i = 0; i < suits.size(); i++){
+      for (int j = card.get_min_value(); j <= card.get_max_value(); j++){
+        Card card = Card(suits.at(i), j);
+        cards.push_back(card);
+        Card card2 = Card(suits.at(i), j);
+        cards.push_back(card2);
+      }
+    }
+  }
+  
+  int suits_ = rand() % 4;
+  if (suit_num == 2){
+    if (suits_ == 0) {
+      suits.push_back(suit::spades);
+      suits.push_back(suit::hearts);
+    }
+    else if (suits_ == 1) {
+      suits.push_back(suit::clubs);
+      suits.push_back(suit::diamonds);        
+    }
+    else if (suits_ == 2) {
+      suits.push_back(suit::spades);
+      suits.push_back(suit::diamonds);        
+    }   
+    else if (suits_ == 3) {
+      suits.push_back(suit::hearts);
+      suits.push_back(suit::clubs);
+    }
+        Card card = Card(suits.at(0), 1);
+    for (int i = 0; i < suits.size(); i++){
+      for (int j = card.get_min_value(); j <= card.get_max_value(); j++){
+        for (int i = 0; i < 4; i++){
+          Card card = Card(suits.at(i), j);
+          cards.push_back(card);
+        }
+      }
+    }
+  }
+  
+  if (suit_num == 1){
+    if (suits_ == 0) {
+      suits.push_back(suit::hearts);
+    }
+    else if (suits_ == 1) {
+      suits.push_back(suit::diamonds);        
+    }
+    else if (suits_ == 2) {
+      suits.push_back(suit::spades);
+    }   
+    else if (suits_ == 3) {
+      suits.push_back(suit::clubs);
+    }
+        Card card = Card(suits.at(0), 1);
+    for (int i = 0; i < suits.size(); i++){
+      for (int j = card.get_min_value(); j <= card.get_max_value(); j++){
+        for (int i = 0; i < 8; i++){
+          Card card = Card(suits.at(i), j);
+          cards.push_back(card);
+        }
+      }
+    }
+  }  
+  
+  
+  
+  //Keverés
+  std::random_shuffle ( cards.begin(), cards.end() );
+  this->deck = cards;  
+  
+  std::vector<Card> stack_cards1 = std::vector<Card>();
+  std::vector<Card> stack_cards2 = std::vector<Card>();
+  std::vector<Card> stack_cards3 = std::vector<Card>();
+  std::vector<Card> stack_cards4 = std::vector<Card>();
+  std::vector<Card> stack_cards5 = std::vector<Card>();
+  std::vector<Card> stack_cards6 = std::vector<Card>();
+  std::vector<Card> stack_cards7 = std::vector<Card>();
+  std::vector<Card> stack_cards8 = std::vector<Card>();
+
+  std::vector<Card> foundation_cards1 = std::vector<Card>();
+  std::vector<Card> foundation_cards2 = std::vector<Card>();
+  std::vector<Card> foundation_cards3 = std::vector<Card>();
+  std::vector<Card> foundation_cards4 = std::vector<Card>();
+  std::vector<Card> foundation_cards5 = std::vector<Card>();
+  std::vector<Card> foundation_cards6 = std::vector<Card>();
+  std::vector<Card> foundation_cards7 = std::vector<Card>();
+  std::vector<Card> foundation_cards8 = std::vector<Card>();  
+  std::vector<Card> foundation_cards9 = std::vector<Card>();
+  std::vector<Card> foundation_cards10 = std::vector<Card>();
+    
+    //Kezdetben minden foundationban annyi lap van, amennyi a sorszáma
+  vector< std::vector<Card> > foundations;
+  foundations.push_back(foundation_cards1);
+  foundations.push_back(foundation_cards2);
+  foundations.push_back(foundation_cards3);
+  foundations.push_back(foundation_cards4);
+  foundations.push_back(foundation_cards5);
+  foundations.push_back(foundation_cards6);
+  foundations.push_back(foundation_cards7);
+  foundations.push_back(foundation_cards8);
+  foundations.push_back(foundation_cards9);
+  foundations.push_back(foundation_cards10);
+  for (int k = 0; k < 54; k++){
+      foundations.at(k % foundations.size()).push_back(deck.at(k));
+    }
+    //Az utolsó lap felfordítása
+  for (int i =0; i < foundations.size(); i++){
+    ((foundations.at(i)).at(foundations.at(i).size()-1)).up();
+  }
+  std::vector<Card> talon_cards = std::vector<Card>();
+  for (int k = 54; k < deck.size(); k++){
+    talon_cards.push_back(deck.at(k));
+  }
+  
+  Pile stack1 = Pile(pile_type::stack, stack_cards1);
+  Pile stack2 = Pile(pile_type::stack, stack_cards2);
+  Pile stack3 = Pile(pile_type::stack, stack_cards3);
+  Pile stack4 = Pile(pile_type::stack, stack_cards4);
+  Pile stack5 = Pile(pile_type::stack, stack_cards5);
+  Pile stack6 = Pile(pile_type::stack, stack_cards6);
+  Pile stack7 = Pile(pile_type::stack, stack_cards7);
+  Pile stack8 = Pile(pile_type::stack, stack_cards8);
+  Pile foundation1 = Pile(pile_type::foundation, foundation_cards1);
+  Pile foundation2 = Pile(pile_type::foundation, foundation_cards2);
+  Pile foundation3 = Pile(pile_type::foundation, foundation_cards3);
+  Pile foundation4 = Pile(pile_type::foundation, foundation_cards4);
+  Pile foundation5 = Pile(pile_type::foundation, foundation_cards5);
+  Pile foundation6 = Pile(pile_type::foundation, foundation_cards6);
+  Pile foundation7 = Pile(pile_type::foundation, foundation_cards7);
+  Pile foundation8 = Pile(pile_type::foundation, foundation_cards8);
+  Pile foundation9 = Pile(pile_type::foundation, foundation_cards9);
+  Pile foundation10 = Pile(pile_type::foundation, foundation_cards10);  
+  Pile talon_ = Pile(pile_type::talon, talon_cards);
+
+  
+  this->piles = std::vector<Pile>();
+  piles.push_back(stack1);
+  piles.push_back(stack2);
+  piles.push_back(stack3);
+  piles.push_back(stack4);
+  piles.push_back(stack5);
+  piles.push_back(stack6);
+  piles.push_back(stack7);
+  piles.push_back(stack8);
+  piles.push_back(foundation1);
+  piles.push_back(foundation2);
+  piles.push_back(foundation3);
+  piles.push_back(foundation4);
+  piles.push_back(foundation5);
+  piles.push_back(foundation6);
+  piles.push_back(foundation7);
+  piles.push_back(foundation8);
+  piles.push_back(foundation9);
+  piles.push_back(foundation10);
+  piles.push_back(talon_);
+  
+}
+
+void Spider::add_card_from(Pile pile1, Pile pile2){
+  if (pile1.get_type() == pile_type::foundation){
+    if (pile2.get_type() == pile_type::foundation){//Üres kezelése?
+      if (pile2.empty()){
+          Card card = pile1.remove_card();
+          pile2.add_card(card);            
+          }
+      else {
+        Card card = pile1.last();
+        vector<Card> cards = vector<Card>();
+        cards.push_back(pile2.last());       
+        cards.push_back(pile1.last());        
+        if (pile2.is_legal_move(2, strat, cards)){
+          card = pile1.remove_card();
+          pile2.add_card(card);
+        }
+        else {
+          throw 
+          std::invalid_argument("Ez a lépés nem szabályos.");          
+        }
+      }
+    }
+  }
+}
+
+void Spider::add_cards_from(Pile found1, Pile found2, int n){
+  //Osztás
+  Pile pile1 = found1;
+  Pile pile2 = found2;
+  if (pile1.get_type() == pile_type::talon){
+    if (pile2.get_type() == pile_type::foundation){
+      for (int i = 0; i < piles.size(); i++){
+        if ((piles.at(i).get_type()) == pile_type::foundation){
+          piles.at(i).add_card(pile1.remove_card());
+        }
+      }
+    }
+  }
+  else if (pile1.get_type() == pile_type::foundation){
+    if (pile2.get_type() == pile_type::stack){
+      int l = pile1.last().get_max_value() - pile1.last().get_min_value()+1;
+      if (pile2.is_legal_stack(pile1.last()) && 
+        pile2.is_legal_move(l, strat, pile1.get_cards())){
+        for (int i = 0; i < l; i++){
+          pile2.add_card(pile1.remove_card());
+        }
+      }
+    }
+    else if (pile2.get_type() == pile_type::foundation){
+
+      vector<Card> cas = vector<Card>();
+      cas = found1.get_cards();
+      vector<Card> cards = vector<Card>();
+
+      if (found2.empty()){
+        for (int i = cas.size()-1-n; i<cas.size(); i++){
+          cards.push_back(cas.at(i));
+        }
+        if (found2.is_legal_move(cards.size(), strat, cards)){
+          found1.remove_cards(n, strat);
+          found2.add_cards(cards, strat);
+        }
+      }
+       else {
+          Card card = found2.last();
+          vector<Card> cards = vector<Card>();
+          cards.push_back(card);  
+          for (int i = cas.size()-1-n; i<cas.size(); i++){
+            cards.push_back(cas.at(i));
+          }          
+         if (found2.is_legal_move(cards.size(), strat, cards) ){
+          found1.remove_cards(n, strat);
+          found2.add_cards(cards, strat);        
+        }
+        else {
+          throw std::invalid_argument("Ez a lépés nem szabályos.");        
+        } 
+       }
+    }
+  }
+}
+
+int Patience::legal_length(Pile found1, Pile found2){}   

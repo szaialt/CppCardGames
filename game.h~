@@ -1,0 +1,20 @@
+#pragma once
+#include <vector>
+#include "pile.h"
+
+class Game {
+  protected:
+    game_strategy strat;
+    std::vector<Pile> piles;
+    std::vector<Card> deck;
+  public:
+    Game(){};
+    Game(game_strategy strat, std::vector<Pile> piles, 
+         std::vector<Card> deck);
+    game_strategy get_strat();
+    std::vector<Pile> get_piles();
+    std::vector<Card> get_deck();
+    virtual void add_card_from(Pile pile1, Pile pile2) = 0;
+    virtual void add_cards_from(Pile found1, Pile found2, int n) = 0;
+    virtual int legal_length(Pile found1, Pile found2) = 0;
+};

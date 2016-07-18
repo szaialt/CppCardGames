@@ -1,0 +1,10 @@
+#include "game.h"
+
+class Patience : public Game {
+  public:
+    Patience();
+    void add_card_from(Pile pile1, Pile pile2);
+    void add_cards_from(Pile found1, Pile found2, int n);
+    int legal_length(Pile found1, Pile found2);
+
+};

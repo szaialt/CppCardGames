@@ -1,0 +1,59 @@
+#include "game.h"
+#include <algorithm>
+
+Game::Game(game_strategy strat, std::vector<Pile> piles, 
+         std::vector<Card> deck){
+   std::vector<Card> myvector = std::vector<Card>(deck);
+   std::random_shuffle ( myvector.begin(), myvector.end() );
+   this->strat = strat;
+   this->piles = piles;
+   this->deck = myvector;
+}
+
+game_strategy Game::get_strat(){
+  return this->strat;
+}
+
+std::vector<Pile> Game::get_piles(){
+  return this->piles;
+}
+
+std::vector<Card> Game::get_deck(){
+  return this->deck;
+}   
+
+int Game::legal_length(Pile found1, Pile found2){
+  if (found2.get_type() != pile_type::foundation) {
+    return 1;
+  }
+  else if (found1.get_type() != pile_type::foundation) {
+    return 1;
+  }
+  else {
+    if (found1.empty()){
+      return 0;
+    }
+    else {
+      Card card = found1.last();
+      int l = card.get_max_value() - card.get_min_value() + 1;
+      for (int i = 0; i < l; i++) {
+        std::vector<Card> cards = found1.get_cards();
+        std::vector<Card> cars = std::vector<Card>();
+      if (found2.empty()) {
+        for (int j = cards.size()-i; j < cards.size(); j++){
+          cars.push_back(cards.at(j));
+        }
+      }
+      else {
+        cars.push_back(found2.last());
+        for (int j = cards.size()-i; j < cards.size(); j++){
+          cars.push_back(cards.at(j));
+        }            
+      }
+      if (found2.is_legal_move(cars.size(), strat, cars)){
+        return i;
+      }
+      }
+    }
+  }
+}

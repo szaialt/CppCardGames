@@ -1,0 +1,269 @@
+#include "patience.h"
+#include <algorithm>
+#include <stdexcept>      // std::invalid_argument
+
+using namespace std;
+
+Patience::Patience(){
+  this->strat = game_strategy::alternate;
+  std::vector<Card> cards = std::vector<Card>();
+  //A pakli előállítása
+  std::vector<suit> suits = std::vector<suit>();
+  suits.push_back(suit::spades);
+  suits.push_back(suit::hearts);
+  suits.push_back(suit::clubs);
+  suits.push_back(suit::diamonds);
+  Card card = Card(suits.at(0), 1);
+  for (int i = 0; i < suits.size(); i++){
+    for (int j = card.get_min_value(); j <= card.get_max_value(); j++){
+      Card card = Card(suits.at(i), j);
+      cards.push_back(card);
+    }
+  }
+  //Keverés
+  std::random_shuffle ( cards.begin(), cards.end() );
+  this->deck = cards;
+  std::vector<Card> waste_cards = std::vector<Card>();
+  Pile waste_ = Pile(pile_type::waste, waste_cards);
+  std::vector<Card> stack_cards1 = std::vector<Card>();
+  Pile stack1 = Pile(pile_type::stack, stack_cards1);
+  std::vector<Card> stack_cards2 = std::vector<Card>();
+  Pile stack2 = Pile(pile_type::stack, stack_cards2);
+  std::vector<Card> stack_cards3 = std::vector<Card>();
+  Pile stack3 = Pile(pile_type::stack, stack_cards3);
+  std::vector<Card> stack_cards4 = std::vector<Card>();
+  Pile stack4 = Pile(pile_type::stack, stack_cards4);
+  std::vector<Card> foundation_cards1 = std::vector<Card>();
+  std::vector<Card> foundation_cards2 = std::vector<Card>();
+  std::vector<Card> foundation_cards3 = std::vector<Card>();
+  std::vector<Card> foundation_cards4 = std::vector<Card>();
+  std::vector<Card> foundation_cards5 = std::vector<Card>();
+  std::vector<Card> foundation_cards6 = std::vector<Card>();
+  std::vector<Card> foundation_cards7 = std::vector<Card>();
+  //Kezdetben minden foundationban annyi lap van, amennyi a sorszáma
+  vector< std::vector<Card> > foundations;
+  foundations.push_back(foundation_cards1);
+  foundations.push_back(foundation_cards2);
+  foundations.push_back(foundation_cards3);
+  foundations.push_back(foundation_cards4);
+  foundations.push_back(foundation_cards5);
+  foundations.push_back(foundation_cards6);
+  foundations.push_back(foundation_cards7);
+  int k = 0;
+  for (int i = 0; i < foundations.size(); i++){
+    for (int j = 0; j <= i; j++){
+      foundations.at(i).push_back(deck.at(k));
+      k++;
+    }
+    //Az utolsó lap felfordítása
+    (foundations.at(i).at(foundations.at(i).size()-1)).up();
+  }    
+  Pile foundation1 = Pile(pile_type::foundation, foundation_cards1);
+  Pile foundation2 = Pile(pile_type::foundation, foundation_cards2);
+  Pile foundation3 = Pile(pile_type::foundation, foundation_cards3);
+  Pile foundation4 = Pile(pile_type::foundation, foundation_cards4);
+  Pile foundation5 = Pile(pile_type::foundation, foundation_cards5);
+  Pile foundation6 = Pile(pile_type::foundation, foundation_cards6);
+  Pile foundation7 = Pile(pile_type::foundation, foundation_cards7);
+  std::vector<Card> talon_cards;
+  for (int i = k; i < deck.size(); i++){
+    talon_cards.push_back(deck.at(i));
+  }  
+  Pile talon_ = Pile(pile_type::talon, talon_cards);
+  this->piles = std::vector<Pile>();
+  piles.push_back(waste_);
+  piles.push_back(stack1);
+  piles.push_back(stack2);
+  piles.push_back(stack3);
+  piles.push_back(stack4);
+  piles.push_back(foundation1);
+  piles.push_back(foundation2);
+  piles.push_back(foundation3);
+  piles.push_back(foundation4);
+  piles.push_back(foundation5);
+  piles.push_back(foundation6);
+  piles.push_back(foundation7);
+  piles.push_back(talon_);
+
+}
+
+void Patience::add_card_from(Pile pile1, Pile pile2){
+  if (pile1.get_type() == pile_type::talon){
+    if (pile2.get_type() == pile_type::waste) {
+      if (pile1.empty()){
+        while (pile2.empty() == false){
+          Card card = pile2.remove_card();
+          card.down();
+          pile1.add_card(card);
+        }
+      }
+      else {
+        Card card = pile1.remove_card();
+        pile2.add_card(card);
+      }
+    }
+  else {
+    throw std::invalid_argument("Ez a lépés nem szabályos.");
+  }
+  }
+  else if (pile1.get_type() == pile_type::waste){
+    if (pile2.get_type() == pile_type::stack){
+      Card card = pile1.last();
+      if (pile2.is_legal_stack(card)) {
+        pile2.add_card(card);
+      }
+    }
+      
+    else if (pile2.get_type() == pile_type::foundation){
+        if (pile2.empty()){
+          Card card = pile1.last();
+          if (card.get_value() == card.get_max_value()){
+            card = pile1.remove_card();
+            pile2.add_card(card);            
+          }
+          else {
+              throw 
+              std::invalid_argument("Üres oszlopba csak király tehető.");          
+          }
+        }
+        else {
+          Card card = pile1.last();
+          vector<Card> cards = vector<Card>();
+          cards.push_back(pile2.last());
+          cards.push_back(pile1.last());
+          if (pile2.is_legal_move(2, strat, cards)){
+            card = pile1.remove_card();
+            pile2.add_card(card);
+        } 
+      }     
+    }
+   else {
+    throw std::invalid_argument("Ez a lépés nem szabályos.");
+  }
+  }
+  else if (pile1.get_type() == pile_type::stack){
+    if (pile2.get_type() == pile_type::foundation){
+        if (pile2.empty()){
+          Card card = pile1.last();
+          if (card.get_value() == card.get_max_value()){
+            card = pile1.remove_card();
+            pile2.add_card(card);            
+          }
+          else {
+              throw 
+              std::invalid_argument("Üres oszlopba csak király tehető.");          
+          }
+        }
+        else {            
+          Card card = pile1.last();
+          vector<Card> cards = vector<Card>();
+          cards.push_back(pile2.last());
+          cards.push_back(pile1.last());
+          if (pile2.is_legal_move(2, strat, cards)){
+            card = pile1.remove_card();
+            pile2.add_card(card);
+        }
+      }      
+    }
+    else {
+      throw std::invalid_argument("Ez a lépés nem szabályos.");
+    }
+  }  
+ 
+  else if (pile1.get_type() == pile_type::foundation){
+    if (pile2.get_type() == pile_type::stack){
+      Card card = pile1.last();
+      if (pile2.is_legal_stack(card)) {
+        pile1.remove_card();
+        pile2.add_card(card);
+      }
+    }
+    else if (pile2.get_type() == pile_type::foundation){
+        if (pile2.empty()){
+          Card card = pile1.last();
+          if (card.get_value() == card.get_max_value()){
+            card = pile1.remove_card();
+            pile2.add_card(card);            
+          }
+          else {
+              throw 
+              std::invalid_argument("Üres oszlopba csak király tehető.");          
+          }
+        }
+        else {
+          Card card = pile1.last();
+          vector<Card> cards = vector<Card>();
+          cards.push_back(pile2.last());
+          cards.push_back(pile1.last());
+          if (pile2.is_legal_move(2, strat, cards)){
+            card = pile1.remove_card();
+            pile2.add_card(card);
+          }
+        }
+      }
+    else {
+      throw std::invalid_argument("Ez a lépés nem szabályos.");
+    }
+    }
+        
+  else {
+    throw std::invalid_argument("Ez a lépés nem szabályos.");
+  }
+}
+   
+void Patience::add_cards_from(Pile found1, Pile found2, int n){
+  if (n == 1){
+    add_card_from(found1, found2);
+  } 
+  if (found1.get_type() == pile_type::waste){
+    if (found2.get_type() == pile_type::talon){
+      while (found1.empty() == false){
+        Card card = found1.remove_card();
+        found2.add_card(card);
+      }
+    }
+  }
+  if (found1.get_type() == pile_type::foundation){
+    if (found2.get_type() == pile_type::foundation){     
+      vector<Card> cas = vector<Card>();    
+      cas = found1.get_cards();
+      if (found2.empty()){
+        vector<Card> cards = vector<Card>();
+        for (int i = cas.size()-1-n; i<cas.size(); i++){
+          cards.push_back(cas.at(i));
+        }
+        if (found2.is_legal_move(cards.size(), strat, cards) &&
+          (cards.at(0)).get_value() == (cards.at(0)).get_max_value()){
+          found1.remove_cards(n, strat);
+          found2.add_cards(cards, strat);        
+        }
+        else {
+          throw std::invalid_argument("Üres oszlop csak királlyal kezdhető.");        
+        }        
+      }
+      else {
+        Card card = found2.last();//Ezt meg kell nézni
+        vector<Card> cards = vector<Card>();
+        cards.push_back(card);
+        vector<Card> cas = vector<Card>();             
+        cas = found1.get_cards();
+        for (int i = cas.size()-1-n; i<cas.size(); i++){
+          cards.push_back(cas.at(i));
+        }
+        if (found2.is_legal_move(cards.size(), strat, cards)){
+          found1.remove_cards(n, strat);
+          found2.add_cards(cards, strat);
+        }
+        else {
+          throw std::invalid_argument("Ez a lépés nem szabályos.");
+        }
+      }
+    }
+  else {
+    throw std::invalid_argument("Ez a lépés nem szabályos.");
+  }
+  }
+}  
+   
+int Patience::legal_length(Pile found1, Pile found2){}   
+   

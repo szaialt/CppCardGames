@@ -1,0 +1,1 @@
+g++ -std=c++11 *.cc `pkg-config --cflags --libs gtk+-3.0`

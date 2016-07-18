@@ -1,0 +1,28 @@
+#pragma once
+#include <vector>
+#include "card.h"
+#include "pile_type.h"
+#include "game_strategy.h"
+
+class Pile {
+  private:
+    pile_type type;
+    std::vector<Card> cards;
+  public:
+    Pile(){};
+    Pile(pile_type type, std::vector<Card> cards);
+    bool black(suit s);
+    pile_type get_type();
+    std::vector<Card> get_cards();
+    void set_cards(std::vector<Card> card);
+    void add_card(Card card);
+    void add_cards(std::vector<Card> cards2, game_strategy strat);
+    Card remove_card();
+    std::vector<Card> remove_cards(int n, game_strategy strat);
+    bool is_legal_move(int n, game_strategy strat, 
+                       std::vector<Card> cards2);
+    bool is_legal_move(int n, game_strategy strat);                   
+    bool is_legal_stack(Card card);
+    bool empty();
+    Card last();
+};
